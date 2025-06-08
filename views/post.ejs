@@ -1,0 +1,80 @@
+<%- include("partials/header.ejs") %>
+
+<body class="d-flex flex-column min-vh-100">
+<div class="container">
+    <div class="comment-section">
+        <!-- New Comment Form -->
+        <div class="mb-4">
+            <div class="d-flex gap-3">
+                <img src="https://icons.veryicon.com/png/128/miscellaneous/xdh-font-graphics-library/anonymous-user.png" alt="User Avatar" class="user-avatar">
+                <div class="flex-grow-1">
+                     <form action="/submit" method="POST">
+                    <textarea id="textArea" name="textArea" class="form-control comment-input" rows="3" placeholder="Write a comment..."></textarea>
+                    
+                    <div class="mt-3 text-end">
+                        <button id="submit" type="submit" name="submit" class="btn btn-comment text-white">Post Comment</button>
+                    </div>
+                </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comments List -->
+        <% if (locals.userError) { %>
+            <script>
+            alert("<%= userError%>") 
+             </script>
+            <% } %>     
+         <% if(locals.userComment) { %>
+           
+            <% for (let i = 0; i < userComment.length; i++) { %>
+        <div class="comments-list"> 
+            <div class="comment-box">
+                <div class="d-flex gap-3">
+                    <img src="https://icons.veryicon.com/png/128/miscellaneous/xdh-font-graphics-library/anonymous-user.png" alt="User Avatar" class="user-avatar">
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">Comment no.<%= i+1 %></h6>
+                        </div>
+                        <p class="mb-2"><%= userComment[i].text %></p>
+                        <br>
+                        <div class="comment-actions">
+                         <!-- Edit Form -->
+                                <form action="/edit/<%= userComment[i].id %>" method="POST" class="d-inline">
+                                <input class="form-control comment-input" type="text" name="newText" placeholder="Edit comment" required>
+                                <button class=" btn-edit text-white" type="submit">Edit</button>
+                            </form>
+
+                            <!-- Delete Form -->
+                                 <form action="/delete/<%= userComment[i].id %>" method="POST" class="d-inline">
+                                 <button  class=" btn-delete text-white" type="submit">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                
+            </div>
+
+        </div>
+        <% } %>
+        <% } else { %>
+       
+            <div class="comments-list"> 
+                <div class="comment-box">
+                    <div class="d-flex gap-3">
+                        <div class="flex-grow-1">   
+                            <p class="mb-2">There are no posted comments yet.</p>
+                            
+                        </div>
+                    </div>
+    
+                    
+                </div>
+    
+            </div>
+     <%   } %>
+    </div>
+</div>
+</body>
+<%- include("partials/footer.ejs") %>

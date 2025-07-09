@@ -11,6 +11,7 @@ import { dirname } from "path";
 import { fileURLToPath } from "url";
 import ejs from "ejs";
 import { Pool } from "pg";
+import flash from 'connect-flash';
 
 const app = express();
 const port = 3000;
@@ -55,12 +56,17 @@ app.use(
 );
 
 
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(flash());
+
+app.use((req, res, next) => {
+  res.locals.error = req.flash("error");
+  next();
+});
 
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.isAuthenticated();
@@ -134,6 +140,7 @@ app.get("/", (req, res) => {
     passport.authenticate("local", {
         successRedirect: "/post",
         failureRedirect: "/login",
+        failureFlash: true,
       })
   );
 
@@ -209,9 +216,7 @@ app.post("/edit/:id", async (req, res) => {
   passport.use("local",
     new Strategy(async function verify(username, password, cb) {
       try {
-        const result = await db.query("SELECT * FROM users WHERE email = $1", [
-          username,
-        ]);
+        const result = await db.query("SELECT * FROM users WHERE email = $1", [username]);
         console.log(result.rows);
         if (result.rows.length > 0) {
           const user = result.rows[0];
@@ -227,12 +232,12 @@ app.post("/edit/:id", async (req, res) => {
                 return cb(null, user);
               } else {
                 //Did not pass password check
-                return cb(null, false);
+                return cb(null, false, { message: "Incorrect password" });
               }
             }
           });
         } else {
-          return cb("User not found");
+          return cb(null, false, { message: "User not found" });
         }
       } catch (err) {
         console.log(err);

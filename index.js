@@ -243,7 +243,9 @@ app.post("/edit/:id", async (req, res) => {
   passport.use("google", new GoogleStrategy ({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/google/secrets",
+    callbackURL: process.env.NODE_ENV === "production"
+  ? "https://personal-blog-wwsz.onrender.com/auth/google/secrets"
+  : "http://localhost:3000/auth/google/secrets",
     userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
   }, async (accessToken, refreshToken, profile, cb)=> {
     console.log(profile);

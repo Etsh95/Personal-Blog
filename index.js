@@ -10,39 +10,61 @@ import env from "dotenv";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import ejs from "ejs";
-import { createClient } from '@supabase/supabase-js';
-const supabaseUrl = 'https://qnbfhuadcagacrgwjwml.supabase.co';
-const supabaseKey = process.env.SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { Pool } from "pg";
 
 const app = express();
 const port = 3000;
 const saltRounds = 10;
 env.config();
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-  })
-);
+const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD } = process.env;
+
+const db = new Pool({
+  host: PGHOST,
+  database: PGDATABASE,
+  username: PGUSER,
+  password: PGPASSWORD,
+  port: 5432,
+  ssl: {
+    require: true,
+  },
+});
+
+async function getPgVersion() {
+  const client = await db.connect();
+  try {
+    const result = await client.query('SELECT version()');
+    console.log(result.rows[0]);
+  } finally {
+    client.release();
+  }
+}
+getPgVersion();
+
+
+
+// app.use(
+//   session({
+//     secret: process.env.SESSION_SECRET,
+//     resave: false,
+//     saveUninitialized: true,
+//   })
+// );
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.initialize());
+// app.use(passport.session());
 
-const db = new pg.Client({
-  user: process.env.PG_USER,
-  host: process.env.PG_HOST,
-  database: process.env.PG_DATABASE,
-  password: process.env.PG_PASSWORD,
-  port: process.env.PG_PORT,
-});
+// const db = new pg.Client({
+//   user: process.env.PG_USER,
+//   host: process.env.PG_HOST,
+//   database: process.env.PG_DATABASE,
+//   password: process.env.PG_PASSWORD,
+//   port: process.env.PG_PORT,
+// });
 
-db.connect();
 
 
 
@@ -58,7 +80,7 @@ app.get("/", (req, res) => {
   app.get("/post", async (req, res) => {
     const result = await db.query("SELECT * FROM comments");
     let comment = result.rows;
-    
+    console.log(result);
     if (comment.length === 0) {
         res.render("post.ejs");
     } else {

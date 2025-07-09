@@ -50,12 +50,14 @@
                       </form>
           
                       <!-- Action buttons -->
-                      <div class="comment-actions mt-2">
-                        <button class="btn-edit btn-delete text-white" data-edit-id="<%= comment.id %>">Edit</button>
-                        <form action="/delete/<%= comment.id %>" method="POST" class="d-inline">
-                          <button class="btn btn-danger btn-sm btn-delete text-white" type="submit">Delete</button>
-                        </form>
-                      </div>
+                      <% if (comment.user_id === currentUser.id) { %>
+                        <div class="comment-actions mt-2">
+                          <button class="btn-edit btn-delete text-white" data-edit-id="<%= comment.id %>">Edit</button>
+                          <form action="/delete/<%= comment.id %>" method="POST" class="d-inline">
+                            <button class="btn btn-danger btn-sm btn-delete text-white" type="submit">Delete</button>
+                          </form>
+                        </div>
+                      <% } %>
                     </div>
                   </div>
                 </div>
